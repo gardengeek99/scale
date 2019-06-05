@@ -12,8 +12,12 @@ def convert_strike_job_inputs(apps, schema_editor):
     
     strikes = Strike.objects.all().iterator()
     for strike in strikes:
-        strike_job = Job.objects.get(pk=strike.job_id)
-
+        try:
+            strike_job = Job.objects.get(pk=strike.job_id)
+        except Job.DoesNotExist:
+            print ('Strike Job %d does not exist, skipping...' % strike.job_id)
+            continue
+        
         changed = False
         if strike_job.input['version'] == '6':
             if 'Strike ID' in strike_job.input['json']:
@@ -39,7 +43,12 @@ def convert_scan_job_inputs(apps, schema_editor):
     
     scans = Scan.objects.all().iterator()
     for scan in scans:
-        scan_job = Job.objects.get(pk=scan.job_id)
+        try:
+            scan_job = Job.objects.get(id=scan.job_id)
+        except Job.DoesNotExist:
+            print ('Scan Job %d does not exist, skipping...' % scan.job_id)
+            continue
+        
         if scan_job.status in ['PENDING', 'QUEUED', 'BLOCKED', 'RUNNING']:
             changed = False
             
