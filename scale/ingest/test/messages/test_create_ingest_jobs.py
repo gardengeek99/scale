@@ -73,3 +73,20 @@ class TestCreateIngest(TestCase):
         self.assertEqual(len(message.new_messages), 1)
         self.assertEqual(message.new_messages[0].type, 'process_job_input')
         
+        
+        import ingest.test.utils as ingest_test_utils
+        scan = ingest_test_utils.create_scan(name='test-1', description='test A')
+        ingest = Ingest.objects.create_ingest(source_file.file_name, workspace_1, scan_id=scan.id)
+        ingest.save()
+        
+        message = CreateIngest()
+        message.create_ingest_type = 'scan_job'
+        message.scan_id = scan.id
+        message.ingest_id = ingest.id
+        
+        result = message.execute()
+        
+        self.assertTrue(result)
+        self.assertEqual(len(message.new_messages), 1)
+        self.assertEqual(message.new_messages[0].type, 'process_job_input')
+        
