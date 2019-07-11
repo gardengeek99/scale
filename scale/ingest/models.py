@@ -909,7 +909,6 @@ class ScanManager(models.Manager):
 
         return scan
 
-    @transaction.atomic
     def queue_scan(self, scan_id, dry_run=True):
         """Retrieves a Scan model and uses metadata to place a job to run the
         Scan process on the queue. All changes to the database will occur in an
@@ -936,16 +935,17 @@ class ScanManager(models.Manager):
             raise ScanIngestJobAlreadyLaunched
 
         job_id = None
-        if dry_run:
-            event = TriggerEvent.objects.create_trigger_event('DRY_RUN_SCAN_CREATED', None, event_description, now())
-            scan.dry_run_job = Queue.objects.queue_new_job_v6(scan_type, job_data, event)
-            job_id = scan.dry_run_job.id
-        else:
-            event = TriggerEvent.objects.create_trigger_event('SCAN_CREATED', None, event_description, now())
-            scan.job = Queue.objects.queue_new_job_v6(scan_type, job_data, event)
-            job_id = scan.job.id
+        with transaction.atomic():
+            if dry_run:
+                event = TriggerEvent.objects.create_trigger_event('DRY_RUN_SCAN_CREATED', None, event_description, now())
+                scan.dry_run_job = Queue.objects.queue_new_job_v6(scan_type, job_data, event)
+                job_id = scan.dry_run_job.id
+            else:
+                event = TriggerEvent.objects.create_trigger_event('SCAN_CREATED', None, event_description, now())
+                scan.job = Queue.objects.queue_new_job_v6(scan_type, job_data, event)
+                job_id = scan.job.id
+            scan.save()
 
-        scan.save()
         CommandMessageManager().send_messages(create_process_job_input_messages([job_id]))
 
         return scan
