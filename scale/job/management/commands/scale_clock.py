@@ -80,7 +80,7 @@ class Command(BaseCommand):
         """
         logger.info('Initializing clock')
         clock_job_type = JobType.objects.get_clock_job_type()
-        clock_job = Job.objects.get(job_type_id=clock_job_type.id)
+        clock_job = Job.objects.filter(job_type_id=clock_job_type.id, state='RUNNING')[0]
         self.job_id = clock_job.id
         self.num_exes = clock_job.num_exes
 

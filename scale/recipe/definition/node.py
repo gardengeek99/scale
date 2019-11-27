@@ -86,7 +86,7 @@ class NodeDefinition(object):
             try:
                 connection.add_value_to_data(input_data, recipe_input_data, node_outputs)
             except InvalidData as ex:
-                if not connection.output_name in optional_outputs:
+                if optional_outputs and not connection.output_name in optional_outputs:
                     logger.warning("output name %s not found in optional_outputs", connection.output_name)
                     raise
                 else:
