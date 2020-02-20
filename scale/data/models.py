@@ -269,6 +269,10 @@ class DataSetMemberManager(models.Manager):
         :type data_started: :class:`datetime.datetime`
         :param data_ended: Query files where data ended before this time.
         :type data_ended: :class:`datetime.datetime`
+        :param created_started: Query files created after this time.
+        :type created_started: :class:`datetime.datetime`
+        :param created_ended: Query files created before this time.
+        :type created_ended: :class:`datetime.datetime`
         :param source_started: Query files where source collection started after this time.
         :type source_started: :class:`datetime.datetime`
         :param source_ended: Query files where source collection ended before this time.
@@ -313,6 +317,7 @@ class DataSetMemberManager(models.Manager):
         
         files = ScaleFile.objects.filter_files(
             data_started=data_started, data_ended=data_ended,
+            created_started=created_started, created_ended=created_ended,
             source_started=source_started, source_ended=source_ended,
             source_sensor_classes=source_sensor_classes, source_sensors=source_sensors,
             source_collections=source_collections, source_tasks=source_tasks,
